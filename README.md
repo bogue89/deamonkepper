@@ -45,8 +45,8 @@ PHP 5.3.0
 Contribute
 ----------
 
-- Issue Tracker: https://github.com/bogue89/Demonkeeper/issues
-- Source Code: https://github.com/bogue89/Demonkeeper
+- Issue Tracker: https://github.com/bogue89/DemonKeeper/issues
+- Source Code: https://github.com/bogue89/DemonKeeper
 
 Support
 -------
