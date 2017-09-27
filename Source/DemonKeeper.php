@@ -1,13 +1,13 @@
 <?php
 
-namespace DeamonKeeper;
+namespace DemonKeeper;
 
 use Exception;
 
-class DeamonKeeper {
+class DemonKeeper {
 		
 	protected $hell = null;
-	protected $deamon = null;
+	protected $demon = null;
 	protected $keeper = null;
 	protected $logger = null;
 	protected $pid = null;
@@ -27,7 +27,7 @@ class DeamonKeeper {
 		$this->options = array_merge($this->options, $options);
 		if(file_exists($script)) {
 			$this->options = array_merge($this->options, pathinfo(realpath($script)));
-			$this->deamon  = $this->options['basename'];
+			$this->demon  = $this->options['basename'];
 			$this->hell    = $this->options['hell'];
 			$this->keeper  =  $this->options['dirname'].$this->options['DS'].$this->options['filename'].'.'.'pid';
 			$this->logger  =  $this->options['dirname'].$this->options['DS'].$this->options['filename'].'.'.'log';
@@ -115,7 +115,7 @@ class DeamonKeeper {
 		}
 		$cchars = " ,+*?[^]($)<>|\"'";
 		$spell  = "{$this->hell} ";
-		$spell .= addcslashes("{$this->options['dirname']}{$this->options['DS']}{$this->deamon}", $cchars);
+		$spell .= addcslashes("{$this->options['dirname']}{$this->options['DS']}{$this->demon}", $cchars);
 		
 		$this->log(date('Y-m-d H:i:s'));
 		if($this->options['background']) {
@@ -145,7 +145,7 @@ class DeamonKeeper {
 		return false;
 	}
 	private function _throw($code) {
-		$error = new DeamonKeeperException($code);
+		$error = new DemonKeeperException($code);
 		if($this->options['throw']) {
 			throw $error;
 		} else {
@@ -153,14 +153,14 @@ class DeamonKeeper {
 		}
 	}
 }
-class DeamonKeeperException extends Exception {
+class DemonKeeperException extends Exception {
 	protected $errors = [
 		1 => 'No script found',
 		2 => 'Couldn\'t log script',
-		3 => 'Couldn\'t lock deamon',
-		4 => 'There is no deamon alive',
-		5 => 'There was an error killing the deamon',
-		6 => 'This deamon is alive'
+		3 => 'Couldn\'t lock the demon',
+		4 => 'There is no demon alive',
+		5 => 'There was an error killing the demon',
+		6 => 'This demon is alive'
 	];
 	public function __construct($code) {
 		return parent::__construct($this->errors[$code], $code);
