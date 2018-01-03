@@ -40,21 +40,17 @@ class DemonKeeper {
 			$output = implode("\n", $output);
 		}
 		try {
-			if(!file_exists($this->logger)) {
-				fopen($this->logger, "w+");
+			if(fwrite(fopen($this->logger, "a"), $output."\n") === false) {
+				$this->_throw(2);	
 			}
-			file_put_contents($this->logger, $output."\n", FILE_APPEND);	
 		} catch(Exception $e) {
 			$this->_throw(2);
 		}
 	}
 	public function lock() {
 		try {
-			if(!file_exists($this->keeper)) {
-				fopen($this->keeper, "w+");
-			}
-			if(is_numeric($this->pid)) {
-				file_put_contents($this->keeper, $this->pid);
+			if(is_numeric($this->pid) && fwrite(fopen($this->keeper, "w"), $this->pid) !== false) {
+				return true;
 			} else {
 				$this->_throw(3);
 			}
@@ -66,11 +62,11 @@ class DemonKeeper {
 	public function unlock() {
 		$this->pid = null;
 		try {
-			if(!file_exists($this->keeper)) {
-				fopen($this->keeper, "w+");
+			if(fwrite(fopen($this->keeper, "w"), $this->pid) !== false) {
+				return true;
+			} else {
+				$this->_throw(3);
 			}
-			file_put_contents($this->keeper, null);
-			return true;
 		} catch(Exception $e) {
 			$this->_throw(3);
 		}
@@ -117,13 +113,13 @@ class DemonKeeper {
 		$spell  = "{$this->hell} ";
 		$spell .= addcslashes("{$this->options['dirname']}{$this->options['DS']}{$this->demon}", $cchars);
 		
-		$this->log(date('Y-m-d H:i:s'));
+		$this->log(date('Y-m-d H:i:s')." Demon started");
 		if($this->options['background']) {
 			$spell .= " >>".addcslashes($this->logger, $cchars)." & echo $!";
 			$this->pid = (int) exec($spell, $output);
 		} else {
 			$spell .= " 2>&1 & echo $!";
-			$this->log(date('Y-m-d H:i:s'));
+			$this->log(date('Y-m-d H:i:s')." Demon started");
 			exec($spell, $output);
 			$this->pid = (int) array_shift($output);
 			if(count($output) > 0) {
@@ -137,9 +133,12 @@ class DemonKeeper {
 			exec("kill {$this->pid} 2>&1", $output, $return_value);
 			if($return_value > 0) {
 				$this->_throw(5);
+				$this->log(date('Y-m-d H:i:s')." Demon throw error 5");
 			}
+			$this->log(date('Y-m-d H:i:s')." Demon stopped");
 			return $this->unlock();
 		} else {
+			$this->log(date('Y-m-d H:i:s')." Demon throw error 4");
 			$this->_throw(4);
 		}
 		return false;
