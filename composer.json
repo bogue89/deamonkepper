@@ -1,0 +1,26 @@
+{
+    "name": "bogue89/demonkeeper",
+    "description": "Deamon process manager.",
+    "type": "library",
+    "keywords": ["deamon", "cronjobs"],
+    "homepage": "https://jorgebenavides.com/demonkeeper",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jorge Benavides",
+            "email": "bogue89@gmail.com",
+            "homepage": "http:s//jorgebenavides.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "files": ["Source/DemonKeeper.php"],
+        "psr-4": {
+            "DemonKeeper\\": "Source"
+        }
+    }
+}
