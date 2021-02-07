@@ -14,23 +14,31 @@ class DemonKeeper {
 	protected $options = array(
 		'hell' => 'php',
 		'throw' => true,
+		'keeper' => null,
+		'logger' => null,
 		'dirname' => null,
 		'basename' => null,
 		'extension' => null,
 		'filename' => null,
 		'background' => true,
+		'vars' => [],
 		'DS' => DIRECTORY_SEPARATOR
 	);
 	public $_errors = array();
 	
 	public function __construct($script, $options=array()) {
-		$this->options = array_merge($this->options, $options);
 		if(file_exists($script)) {
 			$this->options = array_merge($this->options, pathinfo(realpath($script)));
+			$this->options = array_merge($this->options, $options);
+			$this->options = array_merge([
+				'logger' => $this->options['dirname'],
+				'keeper' => $this->options['dirname'],
+			], $this->options);		
 			$this->demon  = $this->options['basename'];
+			$this->vars  = $this->options['vars'];
 			$this->hell    = $this->options['hell'];
-			$this->keeper  =  $this->options['dirname'].$this->options['DS'].$this->options['filename'].'.'.'pid';
-			$this->logger  =  $this->options['dirname'].$this->options['DS'].$this->options['filename'].'.'.'log';
+			$this->keeper  =  $this->options['keeper'].$this->options['DS'].$this->options['filename'].implode('_', $this->vars).'.'.'pid';
+			$this->logger  =  $this->options['logger'].$this->options['DS'].$this->options['filename'].'.'.'log';
 		} else {
 			$this->_throw(1);
 		}
@@ -40,7 +48,7 @@ class DemonKeeper {
 			$output = implode("\n", $output);
 		}
 		try {
-			if(fwrite(fopen($this->logger, "a"), $output."\n") === false) {
+			if(fwrite(fopen($this->logger, "a"), date('Y-m-d H:i:s')." ".$output."\n") === false) {
 				$this->_throw(2);	
 			}
 		} catch(Exception $e) {
@@ -112,20 +120,23 @@ class DemonKeeper {
 		$cchars = " ,+*?[^]($)<>|\"'";
 		$spell  = "{$this->hell} ";
 		$spell .= addcslashes("{$this->options['dirname']}{$this->options['DS']}{$this->demon}", $cchars);
-		
-		$this->log(date('Y-m-d H:i:s')." Demon started");
+		if(!empty($this->vars)) {
+			$spell .= " ".implode(' ', $this->vars);
+		}
+		$this->log("Demon starting");
 		if($this->options['background']) {
 			$spell .= " >>".addcslashes($this->logger, $cchars)." & echo $!";
 			$this->pid = (int) exec($spell, $output);
 		} else {
 			$spell .= " 2>&1 & echo $!";
-			$this->log(date('Y-m-d H:i:s')." Demon started");
+			$this->log("Demon starting");
 			exec($spell, $output);
 			$this->pid = (int) array_shift($output);
 			if(count($output) > 0) {
 				$this->log($output);
 			}
 		}
+		$this->log("Demon {$this->pid} started");
 		return $this->lock();
 	}
 	public function stop() {
@@ -133,12 +144,12 @@ class DemonKeeper {
 			exec("kill {$this->pid} 2>&1", $output, $return_value);
 			if($return_value > 0) {
 				$this->_throw(5);
-				$this->log(date('Y-m-d H:i:s')." Demon throw error 5");
+				$this->log("Demon throw error 5");
 			}
-			$this->log(date('Y-m-d H:i:s')." Demon stopped");
+			$this->log("Demon {$this->pid} stopping");
 			return $this->unlock();
 		} else {
-			$this->log(date('Y-m-d H:i:s')." Demon throw error 4");
+			$this->log("Demon throw error 4");
 			$this->_throw(4);
 		}
 		return false;
